@@ -28,5 +28,6 @@ func main() {
 
 	router.HandleFunc("/users", handler.ExecutorWithDB(user.GET_ALL)).Methods("GET")
 	router.HandleFunc("/courses", handler.ExecutorWithDB(course.POST)).Methods("POST")
+	router.HandleFunc("/course/{course_id}/clone", handler.ExecutorWithDB(course.CLONE)).Methods("POST")
 	http.ListenAndServe(":8001", router)
 }

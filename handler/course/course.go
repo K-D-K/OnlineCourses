@@ -15,18 +15,19 @@ import (
 
 // GET requested project
 func GET(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+	course := get(r, db)
+	byteArr, _ := json.Marshal(course)
+	handler.RespondwithJSON(w, http.StatusOK, byteArr)
+}
+
+func get(r *http.Request, db *gorm.DB) models.Course {
 	params := mux.Vars(r)
 	courseID, err := strconv.ParseUint(params["course_id"], 10, 64)
 	if err != nil {
 		error.ThrowAPIError("Invalid course id")
 	}
 
-	courseInstance := course.INSTANCE(db)
-	course := courseInstance.GetCourse(courseID)
-
-	byteArr, _ := json.Marshal(course)
-
-	handler.RespondwithJSON(w, http.StatusOK, byteArr)
+	return course.INSTANCE(db).GetCourse(courseID)
 }
 
 // GET_ALL courses
@@ -52,5 +53,14 @@ func POST(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	}
 
 	byteArr, _ := json.Marshal(courses)
+	handler.RespondwithJSON(w, http.StatusOK, byteArr)
+}
+
+// CLONE course
+func CLONE(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+	courseInfo := get(r, db)
+	clonedCourse := courseInfo.Clone()
+	course.INSTANCE(db).Create(&clonedCourse)
+	byteArr, _ := json.Marshal(clonedCourse)
 	handler.RespondwithJSON(w, http.StatusOK, byteArr)
 }
