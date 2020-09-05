@@ -6,13 +6,15 @@ type InfoMeta struct {
 	Name        string `json:"name"`
 	Link        string `json:"source"`
 	Status      int    `json:"status"` // Need to create ENUM
-	CreatedByID uint   `json:"-" gorm:"column:created_by" sql:"default:null"`
-	UpdatedByID uint   `json:"-" gorm:"column:updated_by" sql:"default:null"`
+	CreatedByID *uint  `json:"-" gorm:"column:created_by" sql:"default:null"`
+	UpdatedByID *uint  `json:"-" gorm:"column:updated_by" sql:"default:null"`
 }
 
 // SetCreatedBy for InfoMeta
 func (model *InfoMeta) SetCreatedBy(createdBy User) {
-	model.CreatedByID = createdBy.ID
+	if model.CreatedByID == nil {
+		model.CreatedByID = createdBy.ID
+	}
 	model.SetUpdatedBy(createdBy)
 }
 
