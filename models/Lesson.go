@@ -3,5 +3,6 @@ package models
 // Lesson modal
 type Lesson struct {
 	InfoMeta
-	SectionID uint `gorm:"column:section_id" json:"section_id"`
+	LessonID  *uint `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
+	SectionID uint  `gorm:"column:section_id" json:"section_id,string"`
 }

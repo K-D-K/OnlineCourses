@@ -6,8 +6,8 @@ type InfoMeta struct {
 	Name        string `json:"name"`
 	Link        string `json:"source"`
 	Status      int    `json:"status"` // Need to create ENUM
-	CreatedByID uint   `json:"-" gorm:"column:created_by"`
-	UpdatedByID uint   `json:"-" gorm:"column:updated_by"`
+	CreatedByID uint   `json:"-" gorm:"column:created_by" sql:"default:null"`
+	UpdatedByID uint   `json:"-" gorm:"column:updated_by" sql:"default:null"`
 }
 
 // SetCreatedBy for InfoMeta
