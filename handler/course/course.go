@@ -47,7 +47,10 @@ func POST(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	courseInstance := course.INSTANCE(db)
 	for decoder.More() {
 		courseModal := models.Course{}
-		decoder.Decode(&courseModal)
+		err := decoder.Decode(&courseModal)
+		if err != nil {
+			error.ThrowAPIError(err.Error())
+		}
 		courseInstance.Create(&courseModal)
 		courses = append(courses, courseModal)
 	}

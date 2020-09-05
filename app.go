@@ -31,3 +31,8 @@ func main() {
 	router.HandleFunc("/course/{course_id}/clone", handler.ExecutorWithDB(course.CLONE)).Methods("POST")
 	http.ListenAndServe(":8001", router)
 }
+
+/*
+create database onlinecourse ;
+grant ALL PRIVILEGES on database onlinecourse to kdk ;
+*/
