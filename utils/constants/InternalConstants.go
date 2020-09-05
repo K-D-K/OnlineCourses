@@ -1,5 +1,6 @@
 package constants
 
 const (
-	UserInfoKey = "UserInfo"
+	UserInfoKey         = "UserInfo"
+	GORMInstanceUserKey = "tazapay:current_user"
 )

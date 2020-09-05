@@ -2,6 +2,8 @@ package handler
 
 import (
 	"OnlineCourses/datastore"
+	"OnlineCourses/models"
+	"OnlineCourses/utils/constants"
 	couresError "OnlineCourses/utils/error"
 	"encoding/json"
 	"fmt"
@@ -13,7 +15,12 @@ import (
 // ExecutorWithDB is used to create DB connection on request start and handle exception gloabally
 func ExecutorWithDB(handler func(http.ResponseWriter, *http.Request, *gorm.DB)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db := datastore.GetDBConnection().Begin()
+		db := datastore.GetDBConnection()
+		user, hasUser := getUser(r)
+		if hasUser {
+			db = db.Set(constants.GORMInstanceUserKey, user)
+		}
+		db = db.Begin()
 		defer func() {
 			if r := recover(); r != nil {
 				db.Rollback()
@@ -45,4 +52,10 @@ func RespondWithError(w http.ResponseWriter, err error) {
 		byteArr, _ := json.Marshal(map[string]string{"message": "Internal Server Error"})
 		RespondwithJSON(w, http.StatusBadRequest, byteArr)
 	}
+}
+
+func getUser(r *http.Request) (models.User, bool) {
+	ctx := r.Context()
+	user, hasUser := ctx.Value(constants.UserInfoKey).(models.User)
+	return user, hasUser
 }

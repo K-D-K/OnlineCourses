@@ -3,9 +3,20 @@ package models
 // InfoMeta struct contains meta data for models
 type InfoMeta struct {
 	Model
-	Name      string `json:"name"`
-	Link      string `json:"source"`
-	Status    int    `json:"status"` // Need to create ENUM
-	CreatedBy User   `json:"created_by"`
-	UpdatedBy User   `json:"updated_by"`
+	Name        string `json:"name"`
+	Link        string `json:"source"`
+	Status      int    `json:"status"` // Need to create ENUM
+	CreatedByID uint   `json:"-" gorm:"column:created_by"`
+	UpdatedByID uint   `json:"-" gorm:"column:updated_by"`
+}
+
+// SetCreatedBy for InfoMeta
+func (model *InfoMeta) SetCreatedBy(createdBy User) {
+	model.CreatedByID = createdBy.ID
+	model.SetUpdatedBy(createdBy)
+}
+
+// SetUpdatedBy for Info Meta
+func (model *InfoMeta) SetUpdatedBy(updatedBy User) {
+	model.UpdatedByID = updatedBy.ID
 }

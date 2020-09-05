@@ -16,5 +16,10 @@ func GetDBConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+	registerCallBacks(db)
 	return db
+}
+
+func registerCallBacks(db *gorm.DB) {
+	RegisterCallback(db)
 }

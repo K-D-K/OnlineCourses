@@ -17,11 +17,13 @@ func main() {
 	migration.RunMigration()
 	router.HandleFunc("/users", handler.ExecutorWithDB(user.POST)).Methods("POST")
 
+	// Need to add route group to avoid middleware validation
 	router.Use(middleware.UserValidation)
 
 	router.HandleFunc("/course/{course_id}", handler.ExecutorWithDB(course.GET)).Methods("GET")
 	router.HandleFunc("/courses", handler.ExecutorWithDB(course.GET_ALL)).Methods("GET")
 
+	// Need to add route group to avoid middleware validation
 	router.Use(middleware.ValidateAuthorPermissions)
 
 	router.HandleFunc("/users", handler.ExecutorWithDB(user.GET_ALL)).Methods("GET")
