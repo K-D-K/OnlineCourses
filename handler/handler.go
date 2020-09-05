@@ -4,6 +4,7 @@ import (
 	"OnlineCourses/datastore"
 	couresError "OnlineCourses/utils/error"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
@@ -16,6 +17,7 @@ func ExecutorWithDB(handler func(http.ResponseWriter, *http.Request, *gorm.DB)) 
 		defer func() {
 			if r := recover(); r != nil {
 				db.Rollback()
+				fmt.Println((r.(error)).Error())
 				RespondWithError(w, r.(error))
 			} else {
 				db.Commit()
