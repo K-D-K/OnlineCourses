@@ -55,3 +55,7 @@ func (controller Controller) Create(course interface{}) {
 func (controller Controller) Update(course interface{}) {
 	controller.db.Save(course)
 }
+
+func (controller Controller) Delete(courseId uint64) {
+	controller.db.Where("id = ?", courseId).Delete(models.Course{})
+}

@@ -28,5 +28,6 @@ type Entity interface {
 	EntityGroup is defined to handle generic handling for group of entities
 */
 type EntityGroup interface {
-	BulkAfterClone() EntityGroup
+	GroupAfterClone() EntityGroup
+	GroupValidation() error
 }

@@ -86,10 +86,28 @@ func PUT(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		// Need to add validation case here
 		// Validate prev status and current status and should not allow to publish via put request
 		// For publish need to expose seperate API
+		// Need to add method for update with section removal validation
 		courseInstance.Update(&courseModal)
 		courses = append(courses, courseModal)
 	}
 
 	byteArr, _ := json.Marshal(courses)
+	handler.RespondwithJSON(w, http.StatusOK, byteArr)
+}
+
+// PUBLISH the Course
+func PUBLISH(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+	courseInfo := get(r, db)
+	courseID := courseInfo.GetPKID()
+	validationErr := courseInfo.ValidateOnPublish()
+	if validationErr != nil {
+		error.ThrowAPIError(validationErr.Error())
+	}
+	updatedCourse := courseInfo.BeforePublish()
+	courseInstance := course.INSTANCE(db)
+	courseInstance.Update(&updatedCourse)
+	courseInstance.Delete(courseID)
+
+	byteArr, _ := json.Marshal(updatedCourse)
 	handler.RespondwithJSON(w, http.StatusOK, byteArr)
 }
