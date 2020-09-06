@@ -8,8 +8,8 @@ type InfoMeta struct {
 	Name        string       `json:"name"`
 	Link        string       `json:"source"`
 	Status      types.Status `json:"status" gorm:"type:integer"`
-	CreatedByID *uint        `json:"-" gorm:"column:created_by" sql:"default:null"`
-	UpdatedByID *uint        `json:"-" gorm:"column:updated_by" sql:"default:null"`
+	CreatedByID *uint64      `json:"-" gorm:"column:created_by" sql:"default:null"`
+	UpdatedByID *uint64      `json:"-" gorm:"column:updated_by" sql:"default:null"`
 }
 
 // SetCreatedBy for InfoMeta

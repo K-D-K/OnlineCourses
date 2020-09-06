@@ -7,26 +7,32 @@ import (
 // Course Meta data
 type Course struct {
 	InfoMeta
-	CourseID *uint     `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
-	Section  []Section `gorm:"association_autoupdate:false" json:"sections"`
+	CourseID *uint64      `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
+	Section  SectionGroup `gorm:"association_autoupdate:false" json:"sections"`
 }
 
 // AfterClone for Course
-func (course *Course) AfterClone() {
+func (course Course) AfterClone() Course {
 	course.CourseID = course.ID
 	course.ID = nil
-	sections := []Section{}
-	for _, section := range course.Section {
-		(&section).AfterClone()
-		sections = append(sections, section)
-	}
-	course.Section = sections
+	course.Section = course.Section.GroupAfterClone()
+	return course
+}
+
+// GetPKID for that record
+func (course Course) GetPKID() uint64 {
+	return *course.CourseID
+}
+
+// ValidateOnPublish for course
+func (course Course) ValidateOnPublish() error {
+	return nil
 }
 
 // Clone for Course
 func (course Course) Clone() Course {
-	dest := &Course{}
-	copier.Copy(dest, &course)
-	dest.AfterClone()
-	return *dest
+	dest := Course{}
+	copier.Copy(&dest, &course)
+	dest = dest.AfterClone()
+	return dest
 }
