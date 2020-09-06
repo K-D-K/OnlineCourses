@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"github.com/jinzhu/gorm"
 )
 
@@ -21,8 +21,7 @@ func GET(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 }
 
 func get(r *http.Request, db *gorm.DB) models.Course {
-	params := mux.Vars(r)
-	courseID, err := strconv.ParseUint(params["course_id"], 10, 64)
+	courseID, err := strconv.ParseUint(chi.URLParam(r, "course_id"), 10, 64)
 	if err != nil {
 		error.ThrowAPIError("Invalid course id")
 	}
