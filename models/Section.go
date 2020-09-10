@@ -27,8 +27,8 @@ func (section Section) AfterClone() Section {
 }
 
 // GetPKID for section
-func (section Section) GetPKID() uint64 {
-	return *section.ID
+func (section Section) GetPKID() *uint64 {
+	return section.ID
 }
 
 // ValidateOnPublish section for publish

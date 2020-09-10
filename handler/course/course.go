@@ -97,7 +97,7 @@ func PUT(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 // PUBLISH the Course
 func PUBLISH(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	courseInfo := get(r, db)
-	courseID := courseInfo.GetPKID()
+	courseID := *courseInfo.GetPKID()
 	validationErr := courseInfo.ValidateOnPublish()
 	if validationErr != nil {
 		error.ThrowAPIError(validationErr.Error())

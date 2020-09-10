@@ -15,6 +15,8 @@ type Course struct {
 	Section  SectionGroup `json:"sections"` // gorm:"association_autoupdate:false" Commented temporarily
 }
 
+type CourseGroup []Course
+
 // AfterClone for Course
 func (course Course) AfterClone() Course {
 	course.CourseID = course.ID
@@ -24,8 +26,8 @@ func (course Course) AfterClone() Course {
 }
 
 // GetPKID for that record
-func (course Course) GetPKID() uint64 {
-	return *course.ID
+func (course Course) GetPKID() *uint64 {
+	return course.ID
 }
 
 // ValidateOnPublish for course

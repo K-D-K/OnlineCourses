@@ -25,8 +25,8 @@ func (lesson Lesson) AfterClone() Lesson {
 }
 
 // GetPKID .
-func (lesson Lesson) GetPKID() uint64 {
-	return *lesson.ID
+func (lesson Lesson) GetPKID() *uint64 {
+	return lesson.ID
 }
 
 // ValidateOnPublish .

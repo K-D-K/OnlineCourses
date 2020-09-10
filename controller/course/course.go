@@ -39,7 +39,7 @@ func (controller Controller) GetCourse(courceID uint64) models.Course {
 // GetCourses fetch specific course details
 func (controller Controller) GetCourses(courseIDs []uint64) []models.Course {
 	courses := []models.Course{}
-	err := controller.db.Preload("Section.Lesson").Preload("Section").Where("id in (?)", courseIDs).Find(&courses).Error
+	err := controller.db.Where("id in (?)", courseIDs).Find(&courses).Error
 	if err != nil {
 		panic(err)
 	}
