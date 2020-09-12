@@ -20,9 +20,19 @@ type Entity interface {
 	GetPKID() *uint64
 
 	/*
-		Same like AfterClone need to call internal entities ValidateOnPublish to avoid manual handling
+		Reset Id
 	*/
-	ValidateOnPublish() error
+	SetPKID(pkID *uint64)
+
+	/*
+		Get Parent ID
+	*/
+	GetParentID() *uint64
+
+	/*
+		Update parent Id
+	*/
+	SetParentID(parentID *uint64)
 
 	/*
 		Get Child Entities
@@ -35,19 +45,9 @@ type Entity interface {
 	SetChildEntities(entities map[string][]Entity)
 
 	/*
-		Update parent Id
-	*/
-	UpdateParentID(parentID *uint64)
-
-	/*
 		Update Relation ID
 	*/
 	UpdateRelationID(relID *uint64)
-
-	/*
-		Reset Id
-	*/
-	ResetPKID()
 
 	/*
 		Set Status

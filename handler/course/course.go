@@ -45,33 +45,41 @@ func POST(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	decoder := json.NewDecoder(r.Body)
 	decoder.Token()
 	courses := []models.Course{}
-	courseInstance := course.INSTANCE(db)
 	for decoder.More() {
 		courseModal := models.Course{}
 		err := decoder.Decode(&courseModal)
 		if err != nil {
 			error.ThrowAPIError(err.Error())
 		}
+		courses = append(courses, courseModal)
+	}
 
-		entity.ValidateEntityOnCreate(&courseModal)
-		if courseModal.Status == status.STATUS_PUBLISHED {
+	createAll(courses[:], db)
+	byteArr, _ := json.Marshal(courses)
+	handler.RespondwithJSON(w, http.StatusOK, byteArr)
+}
+
+func createAll(courses []models.Course, db *gorm.DB) {
+	courseInstance := course.INSTANCE(db)
+	for index, course := range courses {
+		entity.ValidateEntityOnCreate(&course)
+		if course.Status == status.STATUS_PUBLISHED {
 			statusComparatorInstance := entity.StatusComparator{
 				Status: status.STATUS_PUBLISHED,
 			}
-			statusComparatorInstance.CompareEntityStatus(&courseModal)
+			statusComparatorInstance.CompareEntityStatus(&course)
 		} else {
 			maxStatusValidator := entity.MaxStatusValidation{
 				Status: status.STATUS_SAVED,
 			}
-			maxStatusValidator.CompareEntityStatus(&courseModal)
+			maxStatusValidator.CompareEntityStatus(&course)
 		}
 
-		courseInstance.Create(&courseModal)
-		courses = append(courses, courseModal)
+		// GORM not supported Bulk Insert or Update.
+		// Need to handle associations in our end.
+		courseInstance.Create(&course)
+		courses[index] = course
 	}
-
-	byteArr, _ := json.Marshal(courses)
-	handler.RespondwithJSON(w, http.StatusOK, byteArr)
 }
 
 // CLONE course
@@ -113,16 +121,28 @@ func PUT(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 // PUBLISH the Course
 func PUBLISH(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	courseInfo := get(r, db)
-	courseID := *courseInfo.GetPKID()
-	validationErr := courseInfo.ValidateOnPublish()
-	if validationErr != nil {
-		error.ThrowAPIError(validationErr.Error())
-	}
-	updatedCourse := courseInfo.BeforePublish()
-	courseInstance := course.INSTANCE(db)
-	courseInstance.Update(&updatedCourse)
-	courseInstance.Delete(courseID)
+	var courseID *uint64
 
-	byteArr, _ := json.Marshal(updatedCourse)
+	var statusToValidate status.Status
+	if courseInfo.GetParentID() == nil {
+		statusToValidate = status.STATUS_SAVED
+	} else {
+		courseID = courseInfo.GetPKID()
+		statusToValidate = status.STATUS_MERGED
+	}
+	statusComparatorInstance := entity.StatusComparator{
+		Status: statusToValidate,
+	}
+
+	statusComparatorInstance.CompareEntityStatus(&courseInfo)
+	entity.PublishEntity(&courseInfo)
+
+	courseInstance := course.INSTANCE(db)
+	courseInstance.Update(&courseInfo)
+	if courseID != nil {
+		courseInstance.Delete(*courseID)
+	}
+
+	byteArr, _ := json.Marshal(courseInfo)
 	handler.RespondwithJSON(w, http.StatusOK, byteArr)
 }

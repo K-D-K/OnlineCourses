@@ -8,8 +8,8 @@ import (
 // CloneEntity : to clone a entity
 func CloneEntity(entity interfaces.Entity) {
 	pkID := entity.GetPKID()
-	entity.UpdateParentID(pkID)
-	entity.ResetPKID()
+	entity.SetParentID(pkID)
+	entity.SetPKID(nil)
 	entity.UpdateRelationID(nil)
 	entity.SetStatus(status.STATUS_MERGED)
 

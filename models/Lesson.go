@@ -4,8 +4,6 @@ import (
 	"OnlineCourses/interfaces"
 	"OnlineCourses/models/types/entity"
 	"OnlineCourses/models/types/status"
-	"errors"
-	"strconv"
 )
 
 // Lesson modal
@@ -28,46 +26,19 @@ func (lesson *Lesson) GetPKID() *uint64 {
 	return lesson.ID
 }
 
-// ValidateOnPublish .
-func (lesson *Lesson) ValidateOnPublish() error {
-	if lesson.Status == status.STATUS_MERGED || lesson.Status == status.STATUS_PUBLISHED {
-		return nil
-	}
-	if lesson.LessonID != nil {
-		return errors.New("Kindly merge the Lesson " + strconv.FormatUint(*lesson.ID, 10) + " with " + strconv.FormatUint(*lesson.LessonID, 10))
-	}
-	// TODO : Fix me
-	return errors.New("Kindly publish/Save the lesson")
+// SetPKID .
+func (lesson *Lesson) SetPKID(pkID *uint64) {
+	lesson.ID = pkID
 }
 
-func (lesson Lesson) BeforePublish() Lesson {
-	if lesson.LessonID != nil {
-		lesson.ID = lesson.LessonID
-		lesson.LessonID = nil
-	}
-	lesson.Status = status.STATUS_PUBLISHED
-	return lesson
+// GetParentID .
+func (lesson *Lesson) GetParentID() *uint64 {
+	return lesson.LessonID
 }
 
-// GroupValidation need to be invoked via reflection instead of calling it directly
-// Deprecated
-func (lessons LessonGroup) GroupValidation() error {
-	for _, lesson := range lessons {
-		err := lesson.ValidateOnPublish()
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// GroupBeforePublish invoke afterClone for each entity
-func (lessonGroup LessonGroup) GroupBeforePublish() LessonGroup {
-	lessons := []Lesson{}
-	for _, lesson := range lessonGroup {
-		lessons = append(lessons, lesson.BeforePublish())
-	}
-	return lessons
+// SetParentID .
+func (lesson *Lesson) SetParentID(parentID *uint64) {
+	lesson.LessonID = parentID
 }
 
 // GetChildEntities .
@@ -80,19 +51,9 @@ func (lesson *Lesson) SetChildEntities(entitiesMap map[string][]interfaces.Entit
 	return
 }
 
-// UpdateParentID .
-func (lesson *Lesson) UpdateParentID(parentID *uint64) {
-	lesson.LessonID = parentID
-}
-
 // UpdateRelationID .
 func (lesson *Lesson) UpdateRelationID(relID *uint64) {
 	lesson.SectionID = relID
-}
-
-// ResetPKID .
-func (lesson *Lesson) ResetPKID() {
-	lesson.ID = nil
 }
 
 // SetStatus .
