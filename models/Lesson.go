@@ -10,7 +10,7 @@ import (
 // Lesson modal
 type Lesson struct {
 	InfoMeta
-	LessonID  *uint64 `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
+	LessonID  *uint64 `gorm:"column:parent_id" json:"-" sql:"default:null"`
 	SectionID *uint64 `gorm:"column:section_id" json:"section_id,string"`
 }
 

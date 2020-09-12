@@ -1,6 +1,8 @@
 package models
 
-import "OnlineCourses/models/types/status"
+import (
+	"OnlineCourses/models/types/status"
+)
 
 // InfoMeta struct contains meta data for models
 type InfoMeta struct {

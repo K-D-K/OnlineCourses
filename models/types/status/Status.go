@@ -36,7 +36,7 @@ func (status Status) Value() (driver.Value, error) {
 			return int64(index), nil
 		}
 	}
-	return nil, nil
+	return int64(3), nil
 }
 
 // UnmarshalJSON for status

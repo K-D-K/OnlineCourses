@@ -12,7 +12,7 @@ import (
 type Section struct {
 	InfoMeta
 	CourseID  *uint64  `gorm:"column:course_id" json:"course_id,string"`
-	SectionID *uint64  `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
+	SectionID *uint64  `gorm:"column:parent_id" json:"-" sql:"default:null"`
 	Lesson    []Lesson `json:"lessons" gorm:"association_autoupdate:false;"`
 }
 

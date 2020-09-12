@@ -11,7 +11,7 @@ import (
 // Course Meta data
 type Course struct {
 	InfoMeta
-	CourseID *uint64   `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
+	CourseID *uint64   `gorm:"column:parent_id" json:"-" sql:"default:null"`
 	Section  []Section `json:"sections" gorm:"association_autoupdate:false;"`
 }
 
