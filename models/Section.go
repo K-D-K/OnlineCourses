@@ -1,7 +1,9 @@
 package models
 
 import (
-	"OnlineCourses/models/types"
+	"OnlineCourses/interfaces"
+	"OnlineCourses/models/types/entity"
+	"OnlineCourses/models/types/status"
 	"errors"
 	"strconv"
 )
@@ -9,32 +11,23 @@ import (
 // Section struct
 type Section struct {
 	InfoMeta
-	CourseID  *uint64     `gorm:"column:course_id" json:"course_id,string"`
-	SectionID *uint64     `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
-	Lesson    LessonGroup `json:"lessons"` // gorm:"association_autoupdate:false" Commented temporarily
+	CourseID  *uint64  `gorm:"column:course_id" json:"course_id,string"`
+	SectionID *uint64  `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
+	Lesson    []Lesson `json:"lessons" gorm:"association_autoupdate:false;"`
 }
 
 // SectionGroup groups section
 type SectionGroup []Section
 
-// AfterClone of section
-func (section Section) AfterClone() Section {
-	section.SectionID = section.ID
-	section.ID = nil
-	section.CourseID = nil
-	section.Lesson = section.Lesson.GroupAfterClone()
-	return section
-}
-
 // GetPKID for section
-func (section Section) GetPKID() *uint64 {
+func (section *Section) GetPKID() *uint64 {
 	return section.ID
 }
 
 // ValidateOnPublish section for publish
-func (section Section) ValidateOnPublish() error {
-	if section.Status == types.STATUS_MERGED || section.Status == types.STATUS_PUBLISHED {
-		return section.Lesson.GroupValidation()
+func (section *Section) ValidateOnPublish() error {
+	if section.Status == status.STATUS_MERGED || section.Status == status.STATUS_PUBLISHED {
+		return LessonGroup(section.Lesson).GroupValidation()
 	}
 	if section.SectionID != nil {
 		return errors.New("Kindly merge the Section " + strconv.FormatUint(*section.ID, 10) + " with " + strconv.FormatUint(*section.SectionID, 10))
@@ -43,23 +36,14 @@ func (section Section) ValidateOnPublish() error {
 	return errors.New("Kindly publish/Save the Section")
 }
 
-func (section Section) BeforePublish() Section {
+// BeforePublish .
+func (section *Section) BeforePublish() {
 	if section.SectionID != nil {
 		section.ID = section.SectionID
 		section.SectionID = nil
 	}
-	section.Status = types.STATUS_PUBLISHED
-	section.Lesson = section.Lesson.GroupBeforePublish()
-	return section
-}
-
-// GroupAfterClone invoke afterClone for each entity
-func (sectionGroup SectionGroup) GroupAfterClone() SectionGroup {
-	sections := []Section{}
-	for _, section := range sectionGroup {
-		sections = append(sections, section.AfterClone())
-	}
-	return sections
+	section.Status = status.STATUS_PUBLISHED
+	section.Lesson = LessonGroup(section.Lesson).GroupBeforePublish()
 }
 
 // GroupValidation need to be invoked via reflection instead of calling it directly
@@ -78,7 +62,58 @@ func (sectionGroup SectionGroup) GroupValidation() error {
 func (sectionGroup SectionGroup) GroupBeforePublish() SectionGroup {
 	sections := []Section{}
 	for _, section := range sectionGroup {
-		sections = append(sections, section.BeforePublish())
+		section.BeforePublish()
+		sections = append(sections, section)
+	}
+	return sections
+}
+
+// GetChildEntities .
+func (section *Section) GetChildEntities() map[string][]interfaces.Entity {
+	entitiesMap := make(map[string][]interfaces.Entity)
+	entitiesMap[entity.LESSON] = convertLessonToEntityArr(section.Lesson)
+	return entitiesMap
+}
+
+// SetChildEntities .
+func (section *Section) SetChildEntities(entitiesMap map[string][]interfaces.Entity) {
+	section.Lesson = convertEntityToLessonArr(entitiesMap[entity.LESSON])
+}
+
+// UpdateParentID .
+func (section *Section) UpdateParentID(parentID *uint64) {
+	section.SectionID = parentID
+}
+
+// UpdateRelationID .
+func (section *Section) UpdateRelationID(relID *uint64) {
+	section.CourseID = relID
+}
+
+// ResetPKID .
+func (section *Section) ResetPKID() {
+	section.ID = nil
+}
+
+// UpdateStatus .
+func (section *Section) UpdateStatus(status status.Status) {
+	section.Status = status
+}
+
+func convertSectionToEntityArr(sections []Section) []interfaces.Entity {
+	entities := make([]interfaces.Entity, len(sections))
+	for index, section := range sections {
+		sectionClone := section
+		entities[index] = &sectionClone
+	}
+	return entities
+}
+
+func convertEntityToSectionArr(entities []interfaces.Entity) []Section {
+	sections := make([]Section, len(entities))
+	for index, entity := range entities {
+		section := entity.(*Section)
+		sections[index] = *section
 	}
 	return sections
 }

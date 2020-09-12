@@ -1,5 +1,7 @@
 package interfaces
 
+import "OnlineCourses/models/types/status"
+
 // NOTE : Class is under construction :p. Need to handle all cases
 
 /*
@@ -12,16 +14,42 @@ type Entity interface {
 		Delete missing PK'ids on save.
 		which can be done by adding an method in EntityGroup Interface
 	*/
-	GetPKID() uint64
-	/*
-		Need to add implementation by iterating fields.
-		Ex : Sections inside course need to called programatically with out invoking it explicity
-	*/
-	AfterClone() Entity
+	GetPKID() *uint64
+
 	/*
 		Same like AfterClone need to call internal entities ValidateOnPublish to avoid manual handling
 	*/
 	ValidateOnPublish() error
+
+	/*
+		Get Child Entities
+	*/
+	GetChildEntities() map[string][]Entity
+
+	/*
+		Set Child Entities
+	*/
+	SetChildEntities(entities map[string][]Entity)
+
+	/*
+		Update parent Id
+	*/
+	UpdateParentID(parentID *uint64)
+
+	/*
+		Update Relation ID
+	*/
+	UpdateRelationID(relID *uint64)
+
+	/*
+		Reset Id
+	*/
+	ResetPKID()
+
+	/*
+		Update Status
+	*/
+	UpdateStatus(status status.Status)
 }
 
 /*
@@ -31,3 +59,6 @@ type EntityGroup interface {
 	GroupAfterClone() EntityGroup
 	GroupValidation() error
 }
+
+// EntityGroup .
+// type EntityGroup []Entity

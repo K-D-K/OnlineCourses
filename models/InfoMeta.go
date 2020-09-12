@@ -1,15 +1,15 @@
 package models
 
-import "OnlineCourses/models/types"
+import "OnlineCourses/models/types/status"
 
 // InfoMeta struct contains meta data for models
 type InfoMeta struct {
 	Model
-	Name        string       `json:"name"`
-	Link        string       `json:"source"`
-	Status      types.Status `json:"status" gorm:"type:integer"`
-	CreatedByID *uint64      `json:"-" gorm:"column:created_by" sql:"default:null"`
-	UpdatedByID *uint64      `json:"-" gorm:"column:updated_by" sql:"default:null"`
+	Name        string        `json:"name"`
+	Link        string        `json:"source"`
+	Status      status.Status `json:"status" gorm:"type:integer"`
+	CreatedByID *uint64       `json:"-" gorm:"column:created_by" sql:"default:null"`
+	UpdatedByID *uint64       `json:"-" gorm:"column:updated_by" sql:"default:null"`
 }
 
 // SetCreatedBy for InfoMeta

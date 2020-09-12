@@ -1,39 +1,32 @@
 package models
 
 import (
-	"OnlineCourses/models/types"
+	"OnlineCourses/interfaces"
+	"OnlineCourses/models/types/entity"
+	"OnlineCourses/models/types/status"
 	"errors"
 	"strconv"
-
-	"github.com/jinzhu/copier"
 )
 
 // Course Meta data
 type Course struct {
 	InfoMeta
-	CourseID *uint64      `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
-	Section  SectionGroup `json:"sections"` // gorm:"association_autoupdate:false" Commented temporarily
+	CourseID *uint64   `gorm:"column:parent_id" json:"parent_id,string" sql:"default:null"`
+	Section  []Section `json:"sections" gorm:"association_autoupdate:false;"`
 }
 
+// CourseGroup .
 type CourseGroup []Course
 
-// AfterClone for Course
-func (course Course) AfterClone() Course {
-	course.CourseID = course.ID
-	course.ID = nil
-	course.Section = course.Section.GroupAfterClone()
-	return course
-}
-
 // GetPKID for that record
-func (course Course) GetPKID() *uint64 {
+func (course *Course) GetPKID() *uint64 {
 	return course.ID
 }
 
 // ValidateOnPublish for course
-func (course Course) ValidateOnPublish() error {
-	if course.Status == types.STATUS_MERGED || course.Status == types.STATUS_PUBLISHED {
-		return course.Section.GroupValidation()
+func (course *Course) ValidateOnPublish() error {
+	if course.Status == status.STATUS_MERGED || course.Status == status.STATUS_PUBLISHED {
+		return SectionGroup(course.Section).GroupValidation()
 	}
 	if course.CourseID != nil {
 		return errors.New("Kindly merge the Course " + strconv.FormatUint(*course.ID, 10) + " with " + strconv.FormatUint(*course.CourseID, 10))
@@ -42,20 +35,53 @@ func (course Course) ValidateOnPublish() error {
 	return errors.New("Kindly publish/Save the Course")
 }
 
-// Clone for Course
-func (course Course) Clone() Course {
-	dest := Course{}
-	copier.Copy(&dest, &course)
-	dest = dest.AfterClone()
-	return dest
-}
-
+// BeforePublish .
 func (course Course) BeforePublish() Course {
 	if course.CourseID != nil {
 		course.ID = course.CourseID
 		course.CourseID = nil
 	}
-	course.Status = types.STATUS_PUBLISHED
-	course.Section = course.Section.GroupBeforePublish()
+	course.Status = status.STATUS_PUBLISHED
+	course.Section = SectionGroup(course.Section).GroupBeforePublish()
 	return course
+}
+
+// GetChildEntities .
+func (course *Course) GetChildEntities() map[string][]interfaces.Entity {
+	entitiesMap := make(map[string][]interfaces.Entity)
+	entitiesMap[entity.SECTION] = convertSectionToEntityArr(course.Section)
+	return entitiesMap
+}
+
+// SetChildEntities .
+func (course *Course) SetChildEntities(entitiesMap map[string][]interfaces.Entity) {
+	course.Section = convertEntityToSectionArr(entitiesMap[entity.SECTION])
+}
+
+// UpdateParentID .
+func (course *Course) UpdateParentID(parentID *uint64) {
+	course.CourseID = parentID
+}
+
+// UpdateRelationID .
+func (course *Course) UpdateRelationID(relID *uint64) {
+	return
+}
+
+// ResetPKID .
+func (course *Course) ResetPKID() {
+	course.ID = nil
+}
+
+// UpdateStatus .
+func (course *Course) UpdateStatus(status status.Status) {
+	course.Status = status
+}
+
+func convertCourseIntoEntityArr(courses []Course) []interfaces.Entity {
+	var entities []interfaces.Entity
+	for _, course := range courses {
+		entities = append(entities, &course)
+	}
+	return entities
 }

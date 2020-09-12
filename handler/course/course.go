@@ -3,6 +3,7 @@ package course
 import (
 	"OnlineCourses/controller/course"
 	"OnlineCourses/handler"
+	"OnlineCourses/handler/entity"
 	"OnlineCourses/models"
 	"OnlineCourses/utils/error"
 	"encoding/json"
@@ -62,9 +63,9 @@ func POST(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 // Add validation to clone . It should allow only published Course
 func CLONE(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	courseInfo := get(r, db)
-	clonedCourse := courseInfo.Clone()
-	course.INSTANCE(db).Create(&clonedCourse)
-	byteArr, _ := json.Marshal(clonedCourse)
+	entity.CloneEntity(&courseInfo)
+	course.INSTANCE(db).Create(&courseInfo)
+	byteArr, _ := json.Marshal(courseInfo)
 	handler.RespondwithJSON(w, http.StatusOK, byteArr)
 }
 

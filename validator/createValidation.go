@@ -7,21 +7,26 @@ import (
 
 // ValidateOnCreate validates does any direct and nested record have PK id
 func ValidateOnCreate(value interface{}) error {
-	return validate(reflect.ValueOf(value))
+	return validate(reflect.ValueOf(value), true)
 }
 
-func validate(value reflect.Value) error {
+// ValidateOnUpdate .
+func ValidateOnUpdate(value interface{}) error {
+	return validate(reflect.ValueOf(value), false)
+}
+
+func validate(value reflect.Value, validateCreate bool) error {
 	if isIterable(value) {
-		return validateArray(value)
+		return validateArray(value, validateCreate)
 	} else if value.Kind() == reflect.Struct {
-		return validateStruct(value)
+		return validateStruct(value, validateCreate)
 	}
 	return nil
 }
 
-func validateArray(value reflect.Value) error {
+func validateArray(value reflect.Value, validateCreate bool) error {
 	for i := 0; i < value.Len(); i++ {
-		err := validate(reflect.Indirect(value.Index(i)))
+		err := validate(reflect.Indirect(value.Index(i)), validateCreate)
 		if err != nil {
 			return err
 		}
@@ -29,8 +34,13 @@ func validateArray(value reflect.Value) error {
 	return nil
 }
 
-func validateStruct(value reflect.Value) error {
-	err := checkPkIDOnCreate(value)
+func validateStruct(value reflect.Value, validateCreate bool) error {
+	var err error
+	if validateCreate {
+		err = checkPkIDOnCreate(value)
+	} else {
+		validateCreate = isRecordCreate(value)
+	}
 	if err == nil {
 		valueType := value.Type()
 		for i := 0; i < value.NumField(); i++ {
@@ -41,7 +51,7 @@ func validateStruct(value reflect.Value) error {
 				If we found any case means we need to fetch all fields of the struct including Anonymous in a straight order instead of nesting one
 			*/
 			if !valueType.Field(i).Anonymous {
-				err = validate(reflect.ValueOf(field.Interface()))
+				err = validate(reflect.ValueOf(field.Interface()), validateCreate)
 				if err != nil {
 					return err
 				}
@@ -60,6 +70,14 @@ func checkPkIDOnCreate(value reflect.Value) error {
 		}
 	}
 	return nil
+}
+
+func isRecordCreate(value reflect.Value) bool {
+	method := value.MethodByName("GetPKID")
+	if method.IsValid() {
+		return method.Call([]reflect.Value{})[0].IsNil()
+	}
+	return false
 }
 
 // redundant function

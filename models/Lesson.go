@@ -1,7 +1,8 @@
 package models
 
 import (
-	"OnlineCourses/models/types"
+	"OnlineCourses/interfaces"
+	"OnlineCourses/models/types/status"
 	"errors"
 	"strconv"
 )
@@ -16,22 +17,14 @@ type Lesson struct {
 // LessonGroup for lessons
 type LessonGroup []Lesson
 
-// AfterClone of Lesson
-func (lesson Lesson) AfterClone() Lesson {
-	lesson.LessonID = lesson.ID
-	lesson.SectionID = nil
-	lesson.ID = nil
-	return lesson
-}
-
 // GetPKID .
-func (lesson Lesson) GetPKID() *uint64 {
+func (lesson *Lesson) GetPKID() *uint64 {
 	return lesson.ID
 }
 
 // ValidateOnPublish .
-func (lesson Lesson) ValidateOnPublish() error {
-	if lesson.Status == types.STATUS_MERGED || lesson.Status == types.STATUS_PUBLISHED {
+func (lesson *Lesson) ValidateOnPublish() error {
+	if lesson.Status == status.STATUS_MERGED || lesson.Status == status.STATUS_PUBLISHED {
 		return nil
 	}
 	if lesson.LessonID != nil {
@@ -46,23 +39,14 @@ func (lesson Lesson) BeforePublish() Lesson {
 		lesson.ID = lesson.LessonID
 		lesson.LessonID = nil
 	}
-	lesson.Status = types.STATUS_PUBLISHED
+	lesson.Status = status.STATUS_PUBLISHED
 	return lesson
-}
-
-// GroupAfterClone .
-func (lessonGroup LessonGroup) GroupAfterClone() LessonGroup {
-	lessons := []Lesson{}
-	for _, lesson := range lessonGroup {
-		lessons = append(lessons, lesson.AfterClone())
-	}
-	return lessons
 }
 
 // GroupValidation need to be invoked via reflection instead of calling it directly
 // Deprecated
-func (lessonGroup LessonGroup) GroupValidation() error {
-	for _, lesson := range lessonGroup {
+func (lessons LessonGroup) GroupValidation() error {
+	for _, lesson := range lessons {
 		err := lesson.ValidateOnPublish()
 		if err != nil {
 			return err
@@ -76,6 +60,54 @@ func (lessonGroup LessonGroup) GroupBeforePublish() LessonGroup {
 	lessons := []Lesson{}
 	for _, lesson := range lessonGroup {
 		lessons = append(lessons, lesson.BeforePublish())
+	}
+	return lessons
+}
+
+// GetChildEntities .
+func (lesson *Lesson) GetChildEntities() map[string][]interfaces.Entity {
+	return map[string][]interfaces.Entity{}
+}
+
+// SetChildEntities .
+func (lesson *Lesson) SetChildEntities(entitiesMap map[string][]interfaces.Entity) {
+	return
+}
+
+// UpdateParentID .
+func (lesson *Lesson) UpdateParentID(parentID *uint64) {
+	lesson.LessonID = parentID
+}
+
+// UpdateRelationID .
+func (lesson *Lesson) UpdateRelationID(relID *uint64) {
+	lesson.SectionID = relID
+}
+
+// ResetPKID .
+func (lesson *Lesson) ResetPKID() {
+	lesson.ID = nil
+}
+
+// UpdateStatus .
+func (lesson *Lesson) UpdateStatus(status status.Status) {
+	lesson.Status = status
+}
+
+func convertLessonToEntityArr(lessons []Lesson) []interfaces.Entity {
+	entities := make([]interfaces.Entity, len(lessons))
+	for index, lesson := range lessons {
+		lessonClone := lesson
+		entities[index] = &lessonClone
+	}
+	return entities
+}
+
+func convertEntityToLessonArr(entities []interfaces.Entity) []Lesson {
+	lessons := make([]Lesson, len(entities))
+	for index, entity := range entities {
+		lesson := entity.(*Lesson)
+		lessons[index] = *lesson
 	}
 	return lessons
 }
