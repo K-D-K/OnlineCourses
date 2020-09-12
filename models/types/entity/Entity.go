@@ -8,3 +8,7 @@ const (
 	SECTION        = "section"
 	LESSON         = "lesson"
 )
+
+func (entity Entity) String() string {
+	return string(entity)
+}

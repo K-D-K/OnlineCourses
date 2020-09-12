@@ -23,6 +23,26 @@ var statusArr = [...]Status{
 	STATUS_DRAFT,
 }
 
+var statusVsIndexMap map[Status]int
+
+// GetIndexForStatus .
+func GetIndexForStatus(status Status) int {
+	if len(statusVsIndexMap) == 0 {
+		statusVsIndexMap = make(map[Status]int)
+		for index, statusData := range statusArr {
+			statusVsIndexMap[statusData] = index
+		}
+	}
+	return statusVsIndexMap[status]
+}
+
+var byNameMap = map[string]Status{
+	"published": STATUS_PUBLISHED,
+	"merged":    STATUS_MERGED,
+	"saved":     STATUS_SAVED,
+	"draft":     STATUS_DRAFT,
+}
+
 // Scan for status
 func (status *Status) Scan(value interface{}) error {
 	*status = statusArr[value.(int64)]
@@ -60,4 +80,18 @@ func (status *Status) UnmarshalJSON(b []byte) error {
 		err = errors.New("Invalid status " + errStatus)
 	}
 	return err
+}
+
+func (status Status) String() string {
+	return string(status)
+}
+
+// StatusValueOf for Status equivalent to Java Enum.ValueOf
+func StatusValueOf(status string) Status {
+	return byNameMap[status]
+}
+
+// CompareStatus .
+func CompareStatus(status1 Status, status2 Status) int {
+	return GetIndexForStatus(status1) - GetIndexForStatus(status2)
 }

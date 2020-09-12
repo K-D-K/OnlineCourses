@@ -11,12 +11,17 @@ import (
 // Course Meta data
 type Course struct {
 	InfoMeta
-	CourseID *uint64   `gorm:"column:parent_id" json:"-" sql:"default:null"`
-	Section  []Section `json:"sections" gorm:"association_autoupdate:false;"`
+	CourseID *uint64   `gorm:"column:parent_id" json:"-" sql:"default:null"` // JSON is not exposed so there is no need to add restrict_manual
+	Section  []Section `json:"sections" gorm:"association_autoupdate:false;" tazapay:"restrict_manual:true;child_entity:true"`
 }
 
 // CourseGroup .
 type CourseGroup []Course
+
+// Name of the modal
+func (course *Course) Name() entity.Entity {
+	return entity.COURSE
+}
 
 // GetPKID for that record
 func (course *Course) GetPKID() *uint64 {
@@ -73,9 +78,14 @@ func (course *Course) ResetPKID() {
 	course.ID = nil
 }
 
-// UpdateStatus .
-func (course *Course) UpdateStatus(status status.Status) {
+// SetStatus .
+func (course *Course) SetStatus(status status.Status) {
 	course.Status = status
+}
+
+// GetStatus .
+func (course *Course) GetStatus() status.Status {
+	return course.Status
 }
 
 func convertCourseIntoEntityArr(courses []Course) []interfaces.Entity {

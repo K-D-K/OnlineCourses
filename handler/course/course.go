@@ -5,6 +5,7 @@ import (
 	"OnlineCourses/handler"
 	"OnlineCourses/handler/entity"
 	"OnlineCourses/models"
+	"OnlineCourses/models/types/status"
 	"OnlineCourses/utils/error"
 	"encoding/json"
 	"net/http"
@@ -51,6 +52,20 @@ func POST(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		if err != nil {
 			error.ThrowAPIError(err.Error())
 		}
+
+		entity.ValidateEntityOnCreate(&courseModal)
+		if courseModal.Status == status.STATUS_PUBLISHED {
+			statusComparatorInstance := entity.StatusComparator{
+				Status: status.STATUS_PUBLISHED,
+			}
+			statusComparatorInstance.CompareEntityStatus(&courseModal)
+		} else {
+			maxStatusValidator := entity.MaxStatusValidation{
+				Status: status.STATUS_SAVED,
+			}
+			maxStatusValidator.CompareEntityStatus(&courseModal)
+		}
+
 		courseInstance.Create(&courseModal)
 		courses = append(courses, courseModal)
 	}

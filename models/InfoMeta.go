@@ -10,8 +10,8 @@ type InfoMeta struct {
 	Name        string        `json:"name"`
 	Link        string        `json:"source"`
 	Status      status.Status `json:"status" gorm:"type:integer"`
-	CreatedByID *uint64       `json:"-" gorm:"column:created_by" sql:"default:null"`
-	UpdatedByID *uint64       `json:"-" gorm:"column:updated_by" sql:"default:null"`
+	CreatedByID *uint64       `json:"-" gorm:"column:created_by" sql:"default:null"` // JSON is not exposed so there is no need to add restrict_manual
+	UpdatedByID *uint64       `json:"-" gorm:"column:updated_by" sql:"default:null"` // JSON is not exposed so there is no need to add restrict_manual
 }
 
 // SetCreatedBy for InfoMeta

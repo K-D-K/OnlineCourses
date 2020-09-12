@@ -2,6 +2,7 @@ package models
 
 import (
 	"OnlineCourses/interfaces"
+	"OnlineCourses/models/types/entity"
 	"OnlineCourses/models/types/status"
 	"errors"
 	"strconv"
@@ -10,12 +11,17 @@ import (
 // Lesson modal
 type Lesson struct {
 	InfoMeta
-	LessonID  *uint64 `gorm:"column:parent_id" json:"-" sql:"default:null"`
+	LessonID  *uint64 `gorm:"column:parent_id" json:"-" sql:"default:null"` // JSON is not exposed so there is no need to add restrict_manual
 	SectionID *uint64 `gorm:"column:section_id" json:"section_id,string"`
 }
 
 // LessonGroup for lessons
 type LessonGroup []Lesson
+
+// Name of the modal
+func (lesson *Lesson) Name() entity.Entity {
+	return entity.LESSON
+}
 
 // GetPKID .
 func (lesson *Lesson) GetPKID() *uint64 {
@@ -89,9 +95,14 @@ func (lesson *Lesson) ResetPKID() {
 	lesson.ID = nil
 }
 
-// UpdateStatus .
-func (lesson *Lesson) UpdateStatus(status status.Status) {
+// SetStatus .
+func (lesson *Lesson) SetStatus(status status.Status) {
 	lesson.Status = status
+}
+
+// GetStatus .
+func (lesson *Lesson) GetStatus() status.Status {
+	return lesson.Status
 }
 
 func convertLessonToEntityArr(lessons []Lesson) []interfaces.Entity {

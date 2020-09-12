@@ -1,6 +1,9 @@
 package interfaces
 
-import "OnlineCourses/models/types/status"
+import (
+	"OnlineCourses/models/types/entity"
+	"OnlineCourses/models/types/status"
+)
 
 // NOTE : Class is under construction :p. Need to handle all cases
 
@@ -47,9 +50,19 @@ type Entity interface {
 	ResetPKID()
 
 	/*
-		Update Status
+		Set Status
 	*/
-	UpdateStatus(status status.Status)
+	SetStatus(status status.Status)
+
+	/*
+		Get Status
+	*/
+	GetStatus() status.Status
+
+	/*
+		Name of an Entity
+	*/
+	Name() entity.Entity
 }
 
 /*

@@ -12,12 +12,17 @@ import (
 type Section struct {
 	InfoMeta
 	CourseID  *uint64  `gorm:"column:course_id" json:"course_id,string"`
-	SectionID *uint64  `gorm:"column:parent_id" json:"-" sql:"default:null"`
-	Lesson    []Lesson `json:"lessons" gorm:"association_autoupdate:false;"`
+	SectionID *uint64  `gorm:"column:parent_id" json:"-" sql:"default:null"` // JSON is not exposed so there is no need to add restrict_manual
+	Lesson    []Lesson `json:"lessons" gorm:"association_autoupdate:false;" tazapay:"restrict_manual:true;child_entity:true"`
 }
 
 // SectionGroup groups section
 type SectionGroup []Section
+
+// Name of the modal
+func (section *Section) Name() entity.Entity {
+	return entity.SECTION
+}
 
 // GetPKID for section
 func (section *Section) GetPKID() *uint64 {
@@ -95,9 +100,14 @@ func (section *Section) ResetPKID() {
 	section.ID = nil
 }
 
-// UpdateStatus .
-func (section *Section) UpdateStatus(status status.Status) {
+// SetStatus .
+func (section *Section) SetStatus(status status.Status) {
 	section.Status = status
+}
+
+// GetStatus .
+func (section *Section) GetStatus() status.Status {
+	return section.Status
 }
 
 func convertSectionToEntityArr(sections []Section) []interfaces.Entity {

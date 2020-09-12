@@ -2,54 +2,48 @@ package entity
 
 import (
 	"OnlineCourses/interfaces"
-	"errors"
+	"OnlineCourses/utils/error"
 )
 
 // ValidateEntityOnCreate .
-func ValidateEntityOnCreate(entity interfaces.Entity) error {
-	return ValidateEntity(entity, true)
+func ValidateEntityOnCreate(entity interfaces.Entity) {
+	ValidateEntity(entity, true)
 }
 
 // ValidateEntitiesOnCreate .
-func ValidateEntitiesOnCreate(entities []interfaces.Entity) error {
-	return ValidateEntities(entities, true)
+func ValidateEntitiesOnCreate(entities []interfaces.Entity) {
+	ValidateEntities(entities, true)
 }
 
 // ValidateEntityOnUpdate .
-func ValidateEntityOnUpdate(entity interfaces.Entity) error {
-	return ValidateEntity(entity, false)
+func ValidateEntityOnUpdate(entity interfaces.Entity) {
+	ValidateEntity(entity, false)
 }
 
 // ValidateEntitiesOnUpdate .
-func ValidateEntitiesOnUpdate(entities []interfaces.Entity) error {
-	return ValidateEntities(entities, false)
+func ValidateEntitiesOnUpdate(entities []interfaces.Entity) {
+	ValidateEntities(entities, false)
 }
 
 // ValidateEntity .
-func ValidateEntity(entity interfaces.Entity, isCreate bool) error {
+func ValidateEntity(entity interfaces.Entity, isCreate bool) {
 	if isCreate {
 		if entity.GetPKID() != nil {
-			return errors.New("PKId found on record create validation")
+			error.ThrowAPIError("PKId found on record create validation")
 		}
 	} else {
-		isCreate = entity.GetPKID() == nil
+		isCreate = entity.GetPKID() != nil
 	}
 
 	entities := entity.GetChildEntities()
 	for _, entityGroup := range entities {
 		ValidateEntities(entityGroup, isCreate)
 	}
-	return nil
 }
 
 // ValidateEntities .
-func ValidateEntities(entities []interfaces.Entity, isCreate bool) error {
-	var err error
+func ValidateEntities(entities []interfaces.Entity, isCreate bool) {
 	for _, entity := range entities {
-		err = ValidateEntity(entity, isCreate)
-		if err != nil {
-			break
-		}
+		ValidateEntity(entity, isCreate)
 	}
-	return err
 }
