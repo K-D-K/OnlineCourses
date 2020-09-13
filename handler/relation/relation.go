@@ -78,6 +78,8 @@ func COMPLETE(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 }
 
 // PERMISSION .
+// Need to move (Admin) permissions to another table.
+// Loophole via enroll
 func PERMISSION(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	courseID, err := strconv.ParseUint(chi.URLParam(r, "course_id"), 10, 64)
 	if err != nil {

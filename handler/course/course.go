@@ -132,6 +132,7 @@ func updateAll(courses []models.Course, db *gorm.DB) {
 	if len(pkIDs) == 0 {
 		return
 	}
+	handlerUtils.CheckCoursesPermission(pkIDs, db)
 	deleteEntitiesMap := entity.CollectDeletedDataForEntities(updatedCourseEntityArr)
 
 	courseInstance := course.INSTANCE(db)
