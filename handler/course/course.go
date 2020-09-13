@@ -3,34 +3,25 @@ package course
 import (
 	"OnlineCourses/controller/course"
 	entityController "OnlineCourses/controller/entity"
+	"OnlineCourses/datastore"
 	"OnlineCourses/handler"
 	"OnlineCourses/handler/entity"
+	handlerUtils "OnlineCourses/handler/utils"
 	"OnlineCourses/models"
 	"OnlineCourses/models/types/status"
 	"OnlineCourses/utils"
 	"OnlineCourses/utils/error"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi"
 	"github.com/jinzhu/gorm"
 )
 
 // GET requested project
 func GET(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	course := get(r, db)
+	course := handlerUtils.GetCourse(r, db)
 	byteArr, _ := json.Marshal(course)
 	handler.RespondwithJSON(w, http.StatusOK, byteArr)
-}
-
-func get(r *http.Request, db *gorm.DB) models.Course {
-	courseID, err := strconv.ParseUint(chi.URLParam(r, "course_id"), 10, 64)
-	if err != nil {
-		error.ThrowAPIError("Invalid course id")
-	}
-
-	return course.INSTANCE(db).GetCourse(courseID)
 }
 
 // GET_ALL courses
@@ -63,6 +54,7 @@ func POST(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 
 func createAll(courses []models.Course, db *gorm.DB) {
 	courseInstance := course.INSTANCE(db)
+	courseIDs := make([]uint64, len(courses))
 	for index, course := range courses {
 		entity.ValidateEntityOnCreate(&course)
 		var statusToValidate status.Status
@@ -80,13 +72,16 @@ func createAll(courses []models.Course, db *gorm.DB) {
 		// Need to handle associations in our end.
 		courseInstance.Create(&course)
 		courses[index] = course
+		courseIDs[index] = *course.ID
 	}
+	user, _ := datastore.GetUser(db)
+	handlerUtils.CreatePermissionForCourses(*user.ID, courseIDs, db)
 }
 
 // CLONE course
 // Add validation to clone . It should allow only published Course
 func CLONE(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	courseInfo := get(r, db)
+	courseInfo := handlerUtils.GetCourse(r, db)
 	entity.CloneEntity(&courseInfo)
 	course.INSTANCE(db).Create(&courseInfo)
 	byteArr, _ := json.Marshal(courseInfo)
@@ -155,7 +150,7 @@ func updateAll(courses []models.Course, db *gorm.DB) {
 
 // PUBLISH the Course
 func PUBLISH(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	courseInfo := get(r, db)
+	courseInfo := handlerUtils.GetCourse(r, db)
 	var courseID *uint64
 
 	var statusToValidate status.Status
@@ -177,6 +172,10 @@ func PUBLISH(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	courseInstance.Update(&courseInfo)
 	if courseID != nil {
 		courseInstance.Delete(*courseID)
+
+		// TODO : We need to check existing lessons if new one is added.
+		// we need to update relation table also as incompleted lessons for all user who already enrolled.
+		// This one need to be done in scheduler as huge data may present.
 	}
 
 	byteArr, _ := json.Marshal(courseInfo)

@@ -11,5 +11,12 @@ import (
 func RunMigration() {
 	db := datastore.GetDBConnection()
 	defer db.Close()
-	db.AutoMigrate(&models.Course{}, &models.Lesson{}, &models.Section{}, &models.User{})
+	db.AutoMigrate(
+		&models.Course{},
+		&models.Lesson{},
+		&models.Section{},
+		&models.User{},
+		&models.CourseRelation{},
+		&models.CourseTracker{},
+	)
 }

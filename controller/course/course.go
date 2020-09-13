@@ -2,6 +2,9 @@ package course
 
 import (
 	"OnlineCourses/models"
+	"OnlineCourses/utils/error"
+	"errors"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 )
@@ -31,6 +34,9 @@ func (controller Controller) GetCourse(courceID uint64) models.Course {
 	course := models.Course{}
 	err := controller.db.Preload("Section.Lesson").Preload("Section").First(&course, courceID).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			error.ThrowAPIError("Course not found. Course ID : " + strconv.FormatUint(courceID, 10))
+		}
 		panic(err)
 	}
 	return course
@@ -47,7 +53,7 @@ func (controller Controller) GetCourses(courseIDs []uint64) []models.Course {
 }
 
 // Create a course
-func (controller Controller) Create(course interface{}) {
+func (controller Controller) Create(course *models.Course) {
 	controller.db.Create(course)
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Controller .
 type Controller struct {
 	db *gorm.DB
 }

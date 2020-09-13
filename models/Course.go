@@ -13,9 +13,6 @@ type Course struct {
 	Section  []Section `json:"sections" tazapay:"restrict_manual:true;child_entity:true"`
 }
 
-// CourseGroup .
-type CourseGroup []Course
-
 // Name of the modal
 func (course *Course) Name() entity.Entity {
 	return entity.COURSE
