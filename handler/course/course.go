@@ -63,17 +63,16 @@ func createAll(courses []models.Course, db *gorm.DB) {
 	courseInstance := course.INSTANCE(db)
 	for index, course := range courses {
 		entity.ValidateEntityOnCreate(&course)
+		var statusToValidate status.Status
 		if course.Status == status.STATUS_PUBLISHED {
-			statusComparatorInstance := entity.StatusComparator{
-				Status: status.STATUS_PUBLISHED,
-			}
-			statusComparatorInstance.CompareEntityStatus(&course)
+			statusToValidate = status.STATUS_PUBLISHED
 		} else {
-			maxStatusValidator := entity.MaxStatusValidation{
-				Status: status.STATUS_SAVED,
-			}
-			maxStatusValidator.CompareEntityStatus(&course)
+			statusToValidate = status.STATUS_SAVED
 		}
+		maxStatusValidator := entity.MaxStatusValidation{
+			Status: statusToValidate,
+		}
+		maxStatusValidator.CompareEntityStatus(&course)
 
 		// GORM not supported Bulk Insert or Update.
 		// Need to handle associations in our end.
