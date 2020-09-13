@@ -10,7 +10,6 @@ import (
 	"OnlineCourses/utils"
 	"OnlineCourses/utils/error"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
