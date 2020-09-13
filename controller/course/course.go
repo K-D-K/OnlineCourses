@@ -30,12 +30,12 @@ func (controller Controller) GetAllCourses() []models.Course {
 }
 
 // GetCourse fetch specific course details
-func (controller Controller) GetCourse(courceID uint64) models.Course {
+func (controller Controller) GetCourse(courseID uint64) models.Course {
 	course := models.Course{}
-	err := controller.db.Preload("Section.Lesson").Preload("Section").First(&course, courceID).Error
+	err := controller.db.Preload("Section.Lesson").Preload("Section").First(&course, courseID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			error.ThrowAPIError("Course not found. Course ID : " + strconv.FormatUint(courceID, 10))
+			error.ThrowAPIError("Course not found. Course ID : " + strconv.FormatUint(courseID, 10))
 		}
 		panic(err)
 	}

@@ -73,3 +73,11 @@ func (controller Controller) GetCourseStatus(courseID uint64) (models.CourseRela
 	err := controller.db.Where("user_id = ? and course_id = ?", *user.ID, courseID).First(&courseRel).Error
 	return courseRel, err
 }
+
+// GetCoursesPermission .
+func (controller Controller) GetCoursesPermission(courseIDs []uint64) []models.CourseRelation {
+	user, _ := datastore.GetUser(controller.db)
+	courseRel := []models.CourseRelation{}
+	controller.db.Where("user_id = ? and course_id in (?)", *user.ID, courseIDs).Find(&courseRel)
+	return courseRel
+}

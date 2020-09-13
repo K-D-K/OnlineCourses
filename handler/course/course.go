@@ -20,6 +20,7 @@ import (
 // GET requested project
 func GET(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	course := handlerUtils.GetCourse(r, db)
+	handlerUtils.CheckCoursePermission(*course.ID, db)
 	byteArr, _ := json.Marshal(course)
 	handler.RespondwithJSON(w, http.StatusOK, byteArr)
 }
