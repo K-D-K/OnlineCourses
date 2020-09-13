@@ -39,7 +39,7 @@ func (controller Controller) GetCourse(courceID uint64) models.Course {
 // GetCourses fetch specific course details
 func (controller Controller) GetCourses(courseIDs []uint64) []models.Course {
 	courses := []models.Course{}
-	err := controller.db.Where("id in (?)", courseIDs).Find(&courses).Error
+	err := controller.db.Preload("Section.Lesson").Preload("Section").Where("id in (?)", courseIDs).Find(&courses).Error
 	if err != nil {
 		panic(err)
 	}
@@ -56,6 +56,7 @@ func (controller Controller) Update(course interface{}) {
 	controller.db.Save(course)
 }
 
-func (controller Controller) Delete(courseId uint64) {
-	controller.db.Where("id = ?", courseId).Delete(models.Course{})
+// Delete the course
+func (controller Controller) Delete(courseID uint64) {
+	controller.db.Where("id = ?", courseID).Delete(models.Course{})
 }

@@ -10,7 +10,7 @@ func CloneEntity(entity interfaces.Entity) {
 	pkID := entity.GetPKID()
 	entity.SetParentID(pkID)
 	entity.SetPKID(nil)
-	entity.UpdateRelationID(nil)
+	entity.SetRelationID(nil)
 	entity.SetStatus(status.STATUS_MERGED)
 
 	entityMap := entity.GetChildEntities()

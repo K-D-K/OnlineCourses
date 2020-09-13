@@ -53,11 +53,6 @@ func (course *Course) SetChildEntities(entitiesMap map[string][]interfaces.Entit
 	course.Section = convertEntityToSectionArr(entitiesMap[entity.SECTION])
 }
 
-// UpdateRelationID .
-func (course *Course) UpdateRelationID(relID *uint64) {
-	return
-}
-
 // SetStatus .
 func (course *Course) SetStatus(status status.Status) {
 	course.Status = status
@@ -68,10 +63,31 @@ func (course *Course) GetStatus() status.Status {
 	return course.Status
 }
 
-func convertCourseIntoEntityArr(courses []Course) []interfaces.Entity {
+// SetRelationID .
+func (course *Course) SetRelationID(relID *uint64) {
+	return
+}
+
+// IsDeleted .
+func (course *Course) IsDeleted() bool {
+	return course.Delete
+}
+
+// ConvertCourseIntoEntityArr .
+func ConvertCourseIntoEntityArr(courses []Course) []interfaces.Entity {
 	var entities []interfaces.Entity
 	for _, course := range courses {
 		entities = append(entities, &course)
 	}
 	return entities
+}
+
+// ConvertEntityToCourseArr .
+func ConvertEntityToCourseArr(entities []interfaces.Entity) []Course {
+	courses := make([]Course, len(entities))
+	for index, entity := range entities {
+		course := entity.(*Course)
+		courses[index] = *course
+	}
+	return courses
 }

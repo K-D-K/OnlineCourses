@@ -12,7 +12,7 @@ func PublishEntity(entity interfaces.Entity) {
 		entity.SetPKID(parentID)
 	}
 	entity.SetParentID(nil)
-	entity.UpdateRelationID(nil)
+	entity.SetRelationID(nil)
 	entity.SetStatus(status.STATUS_PUBLISHED)
 
 	entityMap := entity.GetChildEntities()

@@ -13,6 +13,11 @@ import (
 */
 type Entity interface {
 	/*
+		Name of an Entity
+	*/
+	Name() entity.Entity
+
+	/*
 		Fetch PK id so that we group values with the help of Interface.
 		Delete missing PK'ids on save.
 		which can be done by adding an method in EntityGroup Interface
@@ -45,11 +50,6 @@ type Entity interface {
 	SetChildEntities(entities map[string][]Entity)
 
 	/*
-		Update Relation ID
-	*/
-	UpdateRelationID(relID *uint64)
-
-	/*
 		Set Status
 	*/
 	SetStatus(status status.Status)
@@ -60,9 +60,14 @@ type Entity interface {
 	GetStatus() status.Status
 
 	/*
-		Name of an Entity
+		Update Relation ID
 	*/
-	Name() entity.Entity
+	SetRelationID(relID *uint64)
+
+	/*
+		IsDeleted
+	*/
+	IsDeleted() bool
 }
 
 /*

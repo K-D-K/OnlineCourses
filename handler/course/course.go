@@ -6,8 +6,10 @@ import (
 	"OnlineCourses/handler/entity"
 	"OnlineCourses/models"
 	"OnlineCourses/models/types/status"
+	"OnlineCourses/utils"
 	"OnlineCourses/utils/error"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -97,8 +99,8 @@ func CLONE(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 func PUT(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	decoder := json.NewDecoder(r.Body)
 	decoder.Token()
-	courses := []models.Course{}
-	courseInstance := course.INSTANCE(db)
+	coursesToCreate := []models.Course{}
+	coursesToUpdate := []models.Course{}
 	for decoder.More() {
 		courseModal := models.Course{}
 		err := decoder.Decode(&courseModal)
@@ -109,12 +111,43 @@ func PUT(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		// Validate prev status and current status and should not allow to publish via put request
 		// For publish need to expose seperate API
 		// Need to add method for update with section removal validation
-		courseInstance.Update(&courseModal)
-		courses = append(courses, courseModal)
+
+		if courseModal.GetPKID() == nil {
+			coursesToCreate = append(coursesToCreate, courseModal)
+		} else {
+			coursesToUpdate = append(coursesToUpdate, courseModal)
+		}
 	}
 
+	if len(coursesToCreate) > 0 {
+		createAll(coursesToCreate[:], db)
+	}
+	if len(coursesToUpdate) > 0 {
+		fmt.Println(coursesToUpdate)
+		updateAll(coursesToUpdate[:], db)
+	}
+	courses := append(coursesToCreate, coursesToUpdate...)
 	byteArr, _ := json.Marshal(courses)
 	handler.RespondwithJSON(w, http.StatusOK, byteArr)
+}
+
+func updateAll(courses []models.Course, db *gorm.DB) {
+	courseInstance := course.INSTANCE(db)
+	updatedCourseEntityArr := models.ConvertCourseIntoEntityArr(courses)
+	pkIDs := utils.GetPKIDs(updatedCourseEntityArr)
+	if len(pkIDs) == 0 {
+		return
+	}
+	oldCoursesEntityArr := models.ConvertCourseIntoEntityArr(courseInstance.GetCourses(pkIDs))
+	entity.CompareAndUpdateValueForEntities(updatedCourseEntityArr[:], oldCoursesEntityArr)
+	entity.CompareEntityStatus(updatedCourseEntityArr)
+	courses = models.ConvertEntityToCourseArr(updatedCourseEntityArr)
+	for index, course := range courses {
+		// GORM not supported Bulk Insert or Update.
+		// Need to handle associations in our end.
+		courseInstance.Update(&course)
+		courses[index] = course
+	}
 }
 
 // PUBLISH the Course

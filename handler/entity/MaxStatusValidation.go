@@ -30,3 +30,19 @@ func (instance MaxStatusValidation) CompareEntitiesStatus(entities []interfaces.
 		instance.CompareEntityStatus(entity)
 	}
 }
+
+// CompareEntityStatus on update
+func CompareEntityStatus(entities []interfaces.Entity) {
+	for _, entity := range entities {
+		var statusToValidate status.Status
+		if entity.GetParentID() == nil {
+			statusToValidate = status.STATUS_SAVED
+		} else {
+			statusToValidate = status.STATUS_MERGED
+		}
+		maxStatusValidator := MaxStatusValidation{
+			Status: statusToValidate,
+		}
+		maxStatusValidator.CompareEntityStatus(entity)
+	}
+}

@@ -10,6 +10,7 @@ type InfoMeta struct {
 	Name        string        `json:"name"`
 	Link        string        `json:"source"`
 	Status      status.Status `json:"status" gorm:"type:integer"`
+	Delete      bool          `json:"_isdelete,omitempty" gorm:"-"`
 	CreatedByID *uint64       `json:"-" gorm:"column:created_by" sql:"default:null"` // JSON is not exposed so there is no need to add restrict_manual
 	UpdatedByID *uint64       `json:"-" gorm:"column:updated_by" sql:"default:null"` // JSON is not exposed so there is no need to add restrict_manual
 }

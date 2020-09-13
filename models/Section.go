@@ -54,11 +54,6 @@ func (section *Section) SetChildEntities(entitiesMap map[string][]interfaces.Ent
 	section.Lesson = convertEntityToLessonArr(entitiesMap[entity.LESSON])
 }
 
-// UpdateRelationID .
-func (section *Section) UpdateRelationID(relID *uint64) {
-	section.CourseID = relID
-}
-
 // SetStatus .
 func (section *Section) SetStatus(status status.Status) {
 	section.Status = status
@@ -67,6 +62,16 @@ func (section *Section) SetStatus(status status.Status) {
 // GetStatus .
 func (section *Section) GetStatus() status.Status {
 	return section.Status
+}
+
+// UpdateRelationID .
+func (section *Section) SetRelationID(relID *uint64) {
+	section.CourseID = relID
+}
+
+// IsDeleted .
+func (section *Section) IsDeleted() bool {
+	return section.Delete
 }
 
 func convertSectionToEntityArr(sections []Section) []interfaces.Entity {

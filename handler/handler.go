@@ -24,7 +24,7 @@ func ExecutorWithDB(handler func(http.ResponseWriter, *http.Request, *gorm.DB)) 
 		db = db.Begin()
 		defer func() {
 			if r := recover(); r != nil {
-				db.Rollback()
+				fmt.Println(r.(error).Error())
 				fmt.Println(string(debug.Stack()))
 				RespondWithError(w, r.(error))
 			} else {

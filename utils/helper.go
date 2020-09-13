@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"OnlineCourses/interfaces"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -58,7 +59,30 @@ func ConvertToJSONMap(data interface{}) []map[string]interface{} {
 	return tempMap
 }
 
+// ConvertMapIntoStruct .
 func ConvertMapIntoStruct(data []map[string]interface{}, dest interface{}) {
 	byteArr, _ := json.Marshal(data)
 	json.Unmarshal(byteArr, &dest)
+}
+
+// GetPKIDs for entities
+func GetPKIDs(entities []interfaces.Entity) []uint64 {
+	pkIDs := []uint64{}
+	for _, entity := range entities {
+		if entity.GetPKID() != nil {
+			pkIDs = append(pkIDs, *entity.GetPKID())
+		}
+	}
+	return pkIDs
+}
+
+// GetPKIDVsEntityMap .
+func GetPKIDVsEntityMap(entities []interfaces.Entity) map[uint64]interfaces.Entity {
+	pkIDVsEntityMap := make(map[uint64]interfaces.Entity)
+	for _, entity := range entities {
+		if entity.GetPKID() != nil {
+			pkIDVsEntityMap[*entity.GetPKID()] = entity
+		}
+	}
+	return pkIDVsEntityMap
 }
