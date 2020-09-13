@@ -2,6 +2,7 @@ package course
 
 import (
 	"OnlineCourses/controller/course"
+	entityController "OnlineCourses/controller/entity"
 	"OnlineCourses/handler"
 	"OnlineCourses/handler/entity"
 	"OnlineCourses/models"
@@ -123,7 +124,6 @@ func PUT(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		createAll(coursesToCreate[:], db)
 	}
 	if len(coursesToUpdate) > 0 {
-		fmt.Println(coursesToUpdate)
 		updateAll(coursesToUpdate[:], db)
 	}
 	courses := append(coursesToCreate, coursesToUpdate...)
@@ -132,12 +132,14 @@ func PUT(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 }
 
 func updateAll(courses []models.Course, db *gorm.DB) {
-	courseInstance := course.INSTANCE(db)
 	updatedCourseEntityArr := models.ConvertCourseIntoEntityArr(courses)
 	pkIDs := utils.GetPKIDs(updatedCourseEntityArr)
 	if len(pkIDs) == 0 {
 		return
 	}
+	deleteEntitiesMap := entity.CollectDeletedDataForEntities(updatedCourseEntityArr)
+
+	courseInstance := course.INSTANCE(db)
 	oldCoursesEntityArr := models.ConvertCourseIntoEntityArr(courseInstance.GetCourses(pkIDs))
 	entity.CompareAndUpdateValueForEntities(updatedCourseEntityArr[:], oldCoursesEntityArr)
 	entity.CompareEntityStatus(updatedCourseEntityArr)
@@ -148,6 +150,8 @@ func updateAll(courses []models.Course, db *gorm.DB) {
 		courseInstance.Update(&course)
 		courses[index] = course
 	}
+
+	entityController.DeleteEntities(deleteEntitiesMap, db)
 }
 
 // PUBLISH the Course
@@ -167,6 +171,7 @@ func PUBLISH(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	}
 
 	statusComparatorInstance.CompareEntityStatus(&courseInfo)
+	// Need to delete missing entries from clonned course
 	entity.PublishEntity(&courseInfo)
 
 	courseInstance := course.INSTANCE(db)
