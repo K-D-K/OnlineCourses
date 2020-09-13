@@ -5,8 +5,6 @@ import (
 	"OnlineCourses/models/types/status"
 )
 
-// NOTE : Class is under construction :p. Need to handle all cases
-
 /*
 	Entity is defined to handled generic cases in models like course, section and lessons.
 	Each have parent child relationship but at some point all underlying in same point
@@ -69,14 +67,3 @@ type Entity interface {
 	*/
 	IsDeleted() bool
 }
-
-/*
-	EntityGroup is defined to handle generic handling for group of entities
-*/
-type EntityGroup interface {
-	GroupAfterClone() EntityGroup
-	GroupValidation() error
-}
-
-// EntityGroup .
-// type EntityGroup []Entity
